@@ -1,2 +1,28 @@
-# WEATHER-APP
-A sleek, modern, and responsive single-page Weather App built with HTML, CSS, and JavaScript. Get real-time weather information, including temperature, humidity, wind speed, and a 5-day forecast with chance of precipitation. Features a toggleable light/dark theme, gradient backgrounds, weather icons, and a stylish design inspired by Google Weather.
+# 🌤 Weather App
+
+This is a simple **Weather App** built with **HTML, CSS, and JavaScript**.  
+It fetches live weather data and 5-day forecast from **OpenWeatherMap API** and displays it in a clean, animated interface.
+
+---
+
+## **Features**
+
+- Get current weather by city name (e.g., `Delhi, IN`)  
+- 5-day forecast display  
+- Humidity, wind speed, and chance of precipitation  
+- Light/Dark mode toggle  
+- Responsive and animated UI  
+
+---
+
+## **How to Use**
+
+1. Open the app in a browser.  
+2. Enter a city name in the input box.  
+3. Click **Get Weather**.  
+4. Toggle between **light and dark mode** using the 🌓 button.  
+
+
+---
+
+## **Made With ❤️ By Abhik Dey**
