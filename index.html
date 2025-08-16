@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Weather App</title>
+    <style>
+        @keyframes gradientAnimation {
+            0% {background-position: 0% 50%;}
+            50% {background-position: 100% 50%;}
+            100% {background-position: 0% 50%;}
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(-45deg, #0077CC, #00BFFF, #0077CC, #00BFFF);
+            background-size: 400% 400%;
+            animation: gradientAnimation 15s ease infinite;
+            color: white;
+            transition: all 0.5s;
+        }
+
+        body.dark-mode {
+            background: linear-gradient(-45deg, #004466, #0077CC, #004466, #0077CC);
+            color: #e0f7ff;
+        }
+
+        .container {
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 15px;
+            max-width: 450px;
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0px 8px 20px rgba(0,0,0,0.5);
+            transition: all 0.5s;
+        }
+
+        body.dark-mode .container {
+            background: rgba(0, 0, 51, 0.6);
+        }
+
+        h1 {
+            margin-bottom: 15px;
+            font-size: 2rem;
+        }
+
+        input {
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            width: 65%;
+            margin-top: 5px;
+        }
+
+        button {
+            padding: 10px 15px;
+            margin: 5px;
+            border: none;
+            border-radius: 8px;
+            background: white;
+            color: #0077CC;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #e6f2ff;
+        }
+
+        body.dark-mode button {
+            background: #004466;
+            color: #00BFFF;
+        }
+
+        body.dark-mode button:hover {
+            background: #003355;
+        }
+
+        .weather {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        .forecast {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .day {
+            flex: 1;
+            margin: 5px;
+            padding: 10px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+        }
+
+        body.dark-mode .day {
+            background: rgba(0, 51, 102, 0.4);
+        }
+
+        .day img {
+            width: 50px;
+        }
+
+        .footer {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #ffffffaa;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌤 Weather App</h1>
+        <input type="text" id="city" placeholder="Enter city (e.g., Delhi, IN)">
+        <br>
+        <button onclick="getWeather()">Get Weather</button>
+        <button onclick="toggleTheme()">🌓 Toggle Theme</button>
+
+        <div class="weather" id="weather"></div>
+        <div class="forecast" id="forecast"></div>
+        <div class="footer">Made with ❤️ by Abhik Dey</div>
+    </div>
+
+    <script>
+        async function getWeather() {
+            const rawCity = document.getElementById('city').value.trim();
+            if (!rawCity) {
+                alert("Please enter a city name.");
+                return;
+            }
+            const city = encodeURIComponent(rawCity);
+            const apiKey = "553aa442bc056b372a624f7a360dd4d7";
+
+            const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
+            const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&units=metric`;
+
+            try {
+                const [weatherResponse, forecastResponse] = await Promise.all([
+                    fetch(url),
+                    fetch(forecastUrl)
+                ]);
+
+                if (!weatherResponse.ok || !forecastResponse.ok) throw new Error("City not found. Try with country code (e.g., Delhi, IN)");
+
+                const data = await weatherResponse.json();
+                const forecastData = await forecastResponse.json();
+
+                const popList = forecastData.list.slice(0, 8).map(item => item.pop);
+                const avgPop = Math.round((popList.reduce((a, b) => a + b, 0) / popList.length) * 100);
+
+                const weatherHTML = `
+                    <h2>${data.name}, ${data.sys.country}</h2>
+                    <img src="https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png" alt="Weather Icon">
+                    <p style="font-size:2rem;">🌡 ${Math.round(data.main.temp)}°C</p>
+                    <p>📌 ${data.weather[0].description}</p>
+                    <p>💧 Humidity: ${data.main.humidity}% | 💨 Wind: ${data.wind.speed} m/s</p>
+                    <p>🌦 Chance of Precipitation: ${avgPop}%</p>
+                `;
+                document.getElementById('weather').innerHTML = weatherHTML;
+
+                let forecastHTML = "";
+                for (let i = 0; i < forecastData.list.length; i += 8) {
+                    let day = forecastData.list[i];
+                    let date = new Date(day.dt_txt);
+                    forecastHTML += `
+                        <div class="day">
+                            <p><b>${date.toLocaleDateString('en-US', { weekday: 'short' })}</b></p>
+                            <img src="https://openweathermap.org/img/wn/${day.weather[0].icon}.png" alt="icon">
+                            <p>${Math.round(day.main.temp)}°C</p>
+                            <p>🌦 ${Math.round(day.pop*100)}%</p>
+                        </div>
+                    `;
+                }
+                document.getElementById('forecast').innerHTML = forecastHTML;
+
+            } catch (error) {
+                document.getElementById('weather').innerHTML = `<p style="color:red;">${error.message}</p>`;
+                document.getElementById('forecast').innerHTML = "";
+            }
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle("dark-mode");
+        }
+    </script>
+</body>
+</html>
